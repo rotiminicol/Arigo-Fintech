@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Lock, Mail, ChevronRight } from "lucide-react";
-import { DollarSign } from "lucide-react";
+import { Lock, Mail, ChevronRight, ShieldCheck, CreditCard } from "lucide-react";
 
 const VerificationPage = () => {
   const [email, setEmail] = useState("");
@@ -15,19 +14,24 @@ const VerificationPage = () => {
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [stage, setStage] = useState("email"); // email -> code -> success
 
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
     },
     exit: { opacity: 0, y: -20, transition: { duration: 0.4 } },
   };
 
   const buttonVariants = {
-    hover: { scale: 1.03, transition: { duration: 0.2 } },
-    tap: { scale: 0.97 },
+    hover: { 
+      scale: 1.02, 
+      boxShadow: "0 4px 12px rgba(59, 130, 246, 0.2)",
+      transition: { duration: 0.2 } 
+    },
+    tap: { scale: 0.98 },
     disabled: { opacity: 0.7, scale: 1 },
   };
 
@@ -155,78 +159,90 @@ const VerificationPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white text-gray-900 flex items-center justify-center p-4">
-      {/* Subtle background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 to-white"></div>
+    <div className="min-h-screen w-full bg-gray-50 text-gray-900 flex items-center justify-center p-4">
+      {/* Subtle background pattern */}
+      <div className="fixed inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
 
-      {/* Floating particles */}
+      {/* Floating security icons */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(10)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 0.2, scale: 1 }}
-            transition={{ duration: 2, delay: i * 0.3, repeat: Infinity, repeatType: "reverse" }}
-            className="absolute rounded-full bg-blue-400"
+            animate={{ opacity: 0.1, scale: 1 }}
+            transition={{ 
+              duration: 2, 
+              delay: i * 0.3, 
+              repeat: Infinity, 
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+            className="absolute text-blue-300"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 6 + 4}px`,
-              height: `${Math.random() * 6 + 4}px`,
+              fontSize: `${Math.random() * 20 + 10}px`,
             }}
-          />
+          >
+            <ShieldCheck size="1em" />
+          </motion.div>
         ))}
       </div>
 
-      <div className="max-w-6xl w-full relative z-10 flex flex-col md:flex-row rounded-xl overflow-hidden">
+      <div className="max-w-6xl w-full relative z-10 flex flex-col md:flex-row rounded-xl overflow-hidden shadow-xl">
         {/* Left Section - Verification Form */}
         <AnimatePresence mode="wait">
           {stage === "email" && (
             <motion.div
               key="email-form"
-              className="w-full md:w-1/2 bg-white border border-blue-100 rounded-xl md:rounded-r-none p-8 shadow-lg max-w-md mx-auto md:mx-0"
+              className="w-full md:w-1/2 bg-white rounded-xl md:rounded-r-none p-8 md:p-10 max-w-md mx-auto md:mx-0"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <div className="flex items-center space-x-2 mb-6">
+              <div className="flex items-center space-x-3 mb-8">
                 <motion.div
                   whileHover={{ rotate: 15, scale: 1.1 }}
-                  className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center"
+                  className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center shadow-md"
                 >
-                  <DollarSign size={20} className="text-white" />
+                  <CreditCard size={24} className="text-white" />
                 </motion.div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                  Arigo Pay
-                </span>
+                <div>
+                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                    Arigo Pay
+                  </span>
+                  <p className="text-xs text-gray-500 font-medium">SECURE BANKING</p>
+                </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Verify Your Identity
-              </h1>
-              <p className="text-gray-600 flex items-center gap-2 mb-6">
-                <Lock size={16} className="text-blue-600" />
-                Enter your email to receive a secure verification code
-              </p>
+              <div className="mb-8">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  Secure Account Verification
+                </h1>
+                <p className="text-gray-600 flex items-center gap-2">
+                  <Lock size={16} className="text-blue-600" />
+                  Enter your email to receive a secure verification code
+                </p>
+              </div>
 
               {feedback.message && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`p-3 rounded-md mb-4 text-sm ${
+                  className={`p-3 rounded-md mb-6 text-sm ${
                     feedback.type === "error"
-                      ? "bg-red-100 text-red-700 border border-red-200"
-                      : "bg-blue-100 text-blue-700 border border-blue-200"
+                      ? "bg-red-50 text-red-700 border border-red-100"
+                      : "bg-blue-50 text-blue-700 border border-blue-100"
                   }`}
                 >
                   {feedback.message}
                 </motion.div>
               )}
 
-              <form onSubmit={handleEmailSubmit} className="space-y-5">
+              <form onSubmit={handleEmailSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
                   </label>
                   <div className="relative">
@@ -237,14 +253,14 @@ const VerificationPage = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-blue-50/50 border border-blue-200 text-gray-900 rounded-lg py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all duration-300"
-                      placeholder="Enter your email"
+                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all duration-300"
+                      placeholder="your@email.com"
                       required
                       disabled={loading}
                     />
                   </div>
-                  <p className="mt-1.5 text-xs text-gray-600">
-                    We’ll send a 6-digit code to this email
+                  <p className="mt-2 text-xs text-gray-500">
+                    Well send a 6-digit verification code to this address
                   </p>
                 </div>
 
@@ -255,100 +271,120 @@ const VerificationPage = () => {
                   whileHover={loading ? "" : "hover"}
                   whileTap={loading ? "" : "tap"}
                   animate={loading ? "disabled" : ""}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-3 rounded-lg font-semibold shadow-md flex items-center justify-center"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-3.5 rounded-lg font-medium shadow-sm flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                  ) : null}
-                  {loading ? "Sending..." : "Send Verification Code"}
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Sending Code...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={18} />
+                      <span>Send Verification Code</span>
+                    </>
+                  )}
                 </motion.button>
               </form>
+
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <p className="text-xs text-gray-500 text-center">
+                  By continuing, you agree to our <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
+                </p>
+              </div>
             </motion.div>
           )}
 
           {stage === "code" && (
             <motion.div
               key="code-form"
-              className="w-full md:w-1/2 bg-white border border-blue-100 rounded-xl md:rounded-r-none p-8 shadow-lg max-w-md mx-auto md:mx-0"
+              className="w-full md:w-1/2 bg-white rounded-xl md:rounded-r-none p-8 md:p-10 max-w-md mx-auto md:mx-0"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <div className="flex items-center space-x-2 mb-6">
+              <div className="flex items-center space-x-3 mb-8">
                 <motion.div
                   whileHover={{ rotate: 15, scale: 1.1 }}
-                  className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center"
+                  className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center shadow-md"
                 >
-                  <DollarSign size={20} className="text-white" />
+                  <CreditCard size={24} className="text-white" />
                 </motion.div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                  Arigo Pay
-                </span>
+                <div>
+                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                    Arigo Pay
+                  </span>
+                  <p className="text-xs text-gray-500 font-medium">SECURE BANKING</p>
+                </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Enter Verification Code
-              </h1>
-              <p className="text-gray-600 mb-6">
-                We’ve sent a 6-digit code to{" "}
-                <span className="font-medium text-blue-600">{email}</span>
-              </p>
+              <div className="mb-8">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  Enter Verification Code
+                </h1>
+                <p className="text-gray-600">
+                  Weve sent a 6-digit code to{" "}
+                  <span className="font-medium text-blue-600">{email}</span>
+                </p>
+              </div>
 
               {feedback.message && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`p-3 rounded-md mb-4 text-sm ${
+                  className={`p-3 rounded-md mb-6 text-sm ${
                     feedback.type === "error"
-                      ? "bg-red-100 text-red-700 border border-red-200"
-                      : "bg-blue-100 text-blue-700 border border-blue-200"
+                      ? "bg-red-50 text-red-700 border border-red-100"
+                      : "bg-blue-50 text-blue-700 border border-blue-100"
                   }`}
                 >
                   {feedback.message}
                 </motion.div>
               )}
 
-              <form onSubmit={handleCodeSubmit} className="space-y-5">
+              <form onSubmit={handleCodeSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    6-Digit Code
+                    6-Digit Verification Code
                   </label>
-                  <div className="flex gap-2 justify-between mb-2" onPaste={handlePaste}>
+                  <div className="flex gap-3 justify-between mb-3" onPaste={handlePaste}>
                     {code.map((digit, index) => (
                       <input
                         key={index}
                         id={`code-input-${index}`}
                         type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         maxLength={1}
                         value={digit}
                         onChange={(e) => handleCodeChange(index, e.target.value)}
                         onKeyDown={(e) => handleCodeKeyDown(index, e)}
-                        className="w-full h-14 bg-blue-50/50 border border-blue-200 text-gray-900 rounded-lg text-xl font-bold text-center focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all duration-300"
+                        className="w-full h-14 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg text-xl font-bold text-center focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all duration-300"
                         disabled={loading}
                       />
                     ))}
                   </div>
-                  <p className="text-xs text-gray-600 mt-2">
+                  <p className="text-xs text-gray-500">
                     The code expires in 5 minutes
                   </p>
                 </div>
@@ -360,43 +396,50 @@ const VerificationPage = () => {
                   whileHover={loading ? "" : "hover"}
                   whileTap={loading ? "" : "tap"}
                   animate={loading ? "disabled" : ""}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-3 rounded-lg font-semibold shadow-md flex items-center justify-center"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-3.5 rounded-lg font-medium shadow-sm flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                  ) : null}
-                  {loading ? "Verifying..." : "Verify Code"}
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck size={18} />
+                      <span>Verify Account</span>
+                    </>
+                  )}
                 </motion.button>
 
-                <div className="text-center pt-1">
+                <div className="text-center pt-2">
                   <p className="text-sm text-gray-600">
-                    Didn’t receive a code?{" "}
+                    Didnt receive a code?{" "}
                     {canResend ? (
                       <button
                         onClick={handleResendCode}
                         disabled={loading}
                         className="text-blue-600 hover:text-blue-500 font-medium transition-colors"
                       >
-                        Resend
+                        Resend Code
                       </button>
                     ) : (
                       <span className="text-gray-500">Resend in {timeLeft}s</span>
@@ -404,40 +447,56 @@ const VerificationPage = () => {
                   </p>
                 </div>
               </form>
+
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <button 
+                  onClick={() => setStage("email")}
+                  className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
+                >
+                  ← Back to email entry
+                </button>
+              </div>
             </motion.div>
           )}
 
           {stage === "success" && (
             <motion.div
               key="success-screen"
-              className="w-full md:w-1/2 bg-white border border-blue-100 rounded-xl md:rounded-r-none p-8 shadow-lg max-w-md mx-auto md:mx-0"
+              className="w-full md:w-1/2 bg-white rounded-xl md:rounded-r-none p-8 md:p-10 max-w-md mx-auto md:mx-0"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <div className="flex items-center space-x-2 mb-6">
+              <div className="flex items-center space-x-3 mb-8">
                 <motion.div
                   whileHover={{ rotate: 15, scale: 1.1 }}
-                  className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center"
+                  className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center shadow-md"
                 >
-                  <DollarSign size={20} className="text-white" />
+                  <CreditCard size={24} className="text-white" />
                 </motion.div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                  Arigo Pay
-                </span>
+                <div>
+                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                    Arigo Pay
+                  </span>
+                  <p className="text-xs text-gray-500 font-medium">SECURE BANKING</p>
+                </div>
               </div>
 
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center mb-8">
                 <motion.div
-                  className="h-20 w-20 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center shadow-lg"
+                  className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center shadow-lg"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 260, 
+                    damping: 20 
+                  }}
                 >
                   <motion.svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-white"
+                    className="h-12 w-12 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -459,12 +518,13 @@ const VerificationPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
+                className="text-center mb-8"
               >
-                <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-                  Verification Successful!
+                <h1 className="text-2xl font-bold text-gray-900 mb-3">
+                  Account Verified!
                 </h1>
-                <p className="text-gray-600 text-center mb-8">
-                  Your Arigo Pay account is now verified and ready to use.
+                <p className="text-gray-600">
+                  Your Arigo Pay account is now fully secured and ready to use.
                 </p>
               </motion.div>
 
@@ -477,13 +537,19 @@ const VerificationPage = () => {
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-3 rounded-lg font-semibold shadow-md flex items-center justify-center"
-                  onClick={() => navigate("/dashboard")}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-3.5 rounded-lg font-medium shadow-sm flex items-center justify-center gap-2"
+                  onClick={() => navigate("/welcome")}
                 >
-                  Continue to Dashboard
-                  <ChevronRight size={20} className="ml-2" />
+                  <span>Continue to Dashboard</span>
+                  <ChevronRight size={18} />
                 </motion.button>
               </motion.div>
+
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <p className="text-xs text-gray-500 text-center">
+                  Need help? <a href="#" className="text-blue-600 hover:underline">Contact support</a>
+                </p>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -492,49 +558,88 @@ const VerificationPage = () => {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl rounded-l-none items-center justify-center p-8 relative overflow-hidden"
+          transition={{ 
+            duration: 0.5, 
+            delay: 0.3,
+            ease: [0.16, 1, 0.3, 1]
+          }}
+          className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl rounded-l-none items-center justify-center p-8 relative overflow-hidden"
         >
           {/* Abstract shapes */}
           <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute w-64 h-64 rounded-full bg-blue-200/30 -top-20 -right-20"
+            animate={{ 
+              scale: [1, 1.05, 1],
+              rotate: [0, 5, 0]
+            }}
+            transition={{ 
+              duration: 8, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+            className="absolute w-64 h-64 rounded-full bg-white/10 -top-20 -right-20"
           ></motion.div>
           <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute w-48 h-48 rounded-full bg-blue-300/30 -bottom-10 -left-10"
+            animate={{ 
+              scale: [1, 1.05, 1],
+              rotate: [0, -5, 0]
+            }}
+            transition={{ 
+              duration: 8, 
+              repeat: Infinity, 
+              ease: "easeInOut", 
+              delay: 2 
+            }}
+            className="absolute w-48 h-48 rounded-full bg-white/10 -bottom-10 -left-10"
           ></motion.div>
 
-          {/* SVG Illustration - Banking Theme */}
-          <div className="relative z-10 w-full max-w-md">
-            <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="250" cy="200" r="120" fill="rgba(59, 130, 246, 0.1)" />
-              <circle cx="250" cy="200" r="80" fill="rgba(147, 197, 253, 0.1)" />
-              <motion.rect
-                x="150"
-                y="120"
-                width="200"
-                height="120"
-                rx="15"
-                fill="rgba(59, 130, 246, 0.3)"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <rect x="160" y="130" width="180" height="20" rx="5" fill="rgba(255, 255, 255, 0.5)" />
-              <rect x="160" y="160" width="120" height="15" rx="5" fill="rgba(255, 255, 255, 0.3)" />
-              <circle cx="320" cy="190" r="10" fill="rgba(147, 197, 253, 0.5)" />
-            </svg>
-
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-4">
-                Secure Banking Starts Here
+          {/* Content */}
+          <div className="relative z-10 w-full max-w-md text-white">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mb-8"
+            >
+              <ShieldCheck size={48} className="mb-4" />
+              <h2 className="text-3xl font-bold mb-4">
+                Bank-Grade Security
               </h2>
-              <p className="text-gray-600 text-lg max-w-xs">
-                Verify your identity to unlock the full power of Arigo Pay.
+              <p className="text-blue-100 text-lg">
+                Your financial security is our top priority. We use industry-leading encryption and verification to protect your account.
               </p>
-            </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="space-y-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="mt-1">
+                  <svg className="h-5 w-5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-blue-100">256-bit SSL encryption</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="mt-1">
+                  <svg className="h-5 w-5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-blue-100">Two-factor authentication</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="mt-1">
+                  <svg className="h-5 w-5 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-blue-100">Real-time fraud monitoring</p>
+              </div>
+            </motion.div>
           </div>
         </motion.div>
       </div>

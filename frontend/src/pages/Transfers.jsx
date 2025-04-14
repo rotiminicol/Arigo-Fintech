@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle, ChevronDown,  CreditCard, Loader } from 'lucide-react';
-import { motion } from "framer-motion";
+import { AlertTriangle, ArrowRight, CheckCircle, ChevronDown, CreditCard, Loader } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Simulated banks data (normally would come from Paystack API)
+// Simulated banks data
 const NIGERIAN_BANKS = [
   { id: 1, name: 'Access Bank', code: '044' },
   { id: 2, name: 'First Bank', code: '011' },
@@ -13,21 +13,21 @@ const NIGERIAN_BANKS = [
   { id: 7, name: 'Moniepoint', code: '50515' },
   { id: 8, name: 'Palmpay', code: '100033' },
   { id: 9, name: 'Sterling Bank', code: '232' },
-  { id: 10, name: 'Wema Bank', code: '035' }
+  { id: 10, name: 'Wema Bank', code: '035' },
 ];
 
 // Transaction history (simulated)
 const RECENT_TRANSACTIONS = [
   { id: 1, name: 'Chioma Okafor', bank: 'GTBank', amount: 50000, date: '2025-04-08', status: 'success' },
   { id: 2, name: 'Emeka Nwosu', bank: 'Access Bank', amount: 25000, date: '2025-04-07', status: 'success' },
-  { id: 3, name: 'Folake Adeyemi', bank: 'UBA', amount: 75000, date: '2025-04-05', status: 'failed' }
+  { id: 3, name: 'Folake Adeyemi', bank: 'UBA', amount: 75000, date: '2025-04-05', status: 'failed' },
 ];
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',
-    minimumFractionDigits: 2
+    minimumFractionDigits: 2,
   }).format(amount);
 };
 
@@ -42,25 +42,24 @@ const Transfer = () => {
   const [verifying, setVerifying] = useState(false);
   const [transferSuccess, setTransferSuccess] = useState(false);
   const [transferError, setTransferError] = useState(null);
-  const [availableBalance, setAvailableBalance] = useState(250000); // Demo balance
+  const [availableBalance, setAvailableBalance] = useState(250000);
 
-  // Function to verify account number (simulated Paystack API call)
+  // Verify account number
   const verifyAccount = () => {
     if (!selectedBank || accountNumber.length !== 10) return;
-    
+
     setVerifying(true);
-    // Simulate API call delay
     setTimeout(() => {
-      // Mock response based on input to simulate API
       if (accountNumber === '0123456789') {
         setAccountName('John Okonkwo');
       } else if (accountNumber === '9876543210') {
         setAccountName('Amina Ibrahim');
       } else {
-        // Generate a random Nigerian name for demo purposes
         const firstNames = ['Chioma', 'Emeka', 'Ngozi', 'Oluwaseun', 'Tunde', 'Blessing', 'Chinedu'];
         const lastNames = ['Okafor', 'Mohammed', 'Adeyemi', 'Okonkwo', 'Ibrahim', 'Nwosu', 'Eze'];
-        const randomName = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+        const randomName = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${
+          lastNames[Math.floor(Math.random() * lastNames.length)]
+        }`;
         setAccountName(randomName);
       }
       setVerifying(false);
@@ -89,14 +88,11 @@ const Transfer = () => {
     setLoading(true);
     setTransferError(null);
 
-    // Simulate API call to Paystack for transfer
     setTimeout(() => {
-      // Mock successful transfer
-      setAvailableBalance(prev => prev - parseFloat(amount));
+      setAvailableBalance((prev) => prev - parseFloat(amount));
       setLoading(false);
       setTransferSuccess(true);
-      
-      // Reset form after success message display
+
       setTimeout(() => {
         setSelectedBank(null);
         setAccountNumber('');
@@ -108,251 +104,360 @@ const Transfer = () => {
     }, 2000);
   };
 
-  return (
-    <div className="bg-white min-h-screen">
-      {/* Header */}
-      <div className="bg-blue-600 text-white p-6">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold">Bank Transfer</h1>
-          <p className="text-blue-100">Transfer funds to any Nigerian bank account</p>
-        </div>
-      </div>
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
 
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Main transfer form */}
-          <div className="md:w-2/3">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white rounded-lg shadow-lg p-6 mb-6"
-            >
-              <h2 className="text-xl font-semibold text-gray-800 mb-6">Transfer Details</h2>
-              
-              {transferSuccess ? (
-                <motion.div 
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6"
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+  };
+
+  const buttonVariants = {
+    hover: {
+      scale: 1.05,
+      boxShadow: '0 10px 25px rgba(59, 130, 246, 0.5)',
+      transition: {
+        type: 'spring',
+        stiffness: 400,
+        damping: 10,
+      },
+    },
+    tap: {
+      scale: 0.95,
+      boxShadow: '0 5px 15px rgba(59, 130, 246, 0.3)',
+    },
+  };
+
+  return (
+    <motion.div
+      className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 relative overflow-hidden"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Decorative Background Elements */}
+      <motion.div
+        className="absolute top-20 right-20 w-64 h-64 rounded-full bg-blue-400/10 blur-3xl"
+        animate={{ x: [0, 20, 0], y: [0, -20, 0], scale: [1, 1.2, 1] }}
+        transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="absolute bottom-40 left-10 w-40 h-40 rounded-full bg-blue-300/10 blur-2xl"
+        animate={{ x: [0, -10, 0], y: [0, 15, 0] }}
+        transition={{ repeat: Infinity, duration: 10, ease: 'easeInOut' }}
+      />
+
+      <div className="flex flex-col lg:flex-row h-full">
+        {/* Main transfer form */}
+        <div className="lg:w-2/3 p-6 lg:p-10">
+          <motion.div variants={itemVariants} className="bg-white/10 backdrop-blur-sm rounded-xl p-8 shadow-lg shadow-blue-700/30">
+            <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Bank Transfer</h1>
+            <p className="text-blue-100 text-sm mb-8">Send money securely to any Nigerian bank account</p>
+
+            <AnimatePresence>
+              {transferSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-green-500/20 border border-green-300/30 rounded-lg p-4 flex items-center mb-6"
                 >
-                  <CheckCircle className="text-green-500 mr-3" />
+                  <CheckCircle className="text-green-400 mr-3 h-6 w-6" />
                   <div>
-                    <p className="font-medium text-green-800">Transfer Successful!</p>
-                    <p className="text-green-600 text-sm">Your transfer of {formatCurrency(amount)} to {accountName} has been processed.</p>
+                    <p className="font-medium text-green-100">Transfer Successful!</p>
+                    <p className="text-green-200 text-sm">
+                      {formatCurrency(amount)} sent to {accountName}.
+                    </p>
                   </div>
                 </motion.div>
-              ) : null}
+              )}
 
-              {transferError ? (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
-                  <AlertTriangle className="text-red-500 mr-3" />
-                  <p className="text-red-700">{transferError}</p>
-                </div>
-              ) : null}
+              {transferError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-red-500/20 border border-red-300/30 rounded-lg p-4 flex items-center mb-6"
+                >
+                  <AlertTriangle className="text-red-400 mr-3 h-5 w-5" />
+                  <p className="text-red-200 text-sm">{transferError}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-              {/* Bank Selection */}
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-medium mb-2">Select Bank</label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    className="w-full flex justify-between items-center px-4 py-3 border border-gray-300 rounded-lg bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onClick={() => setBankDropdownOpen(!bankDropdownOpen)}
+            {/* Bank Selection */}
+            <div className="mb-6">
+              <label
+                htmlFor="bank-select"
+                className="block text-sm font-medium text-blue-100 uppercase tracking-wider mb-2"
+              >
+                Select Bank <span className="text-red-300">*</span>
+              </label>
+              <div className="relative">
+                <button
+                  id="bank-select"
+                  type="button"
+                  className="w-full flex justify-between items-center px-4 py-3 border border-white/20 rounded-lg bg-white/5 text-white/80 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+                  onClick={() => setBankDropdownOpen(!bankDropdownOpen)}
+                  aria-expanded={bankDropdownOpen}
+                  aria-haspopup="listbox"
+                >
+                  <span className={selectedBank ? 'text-white' : 'text-white/50'}>
+                    {selectedBank ? selectedBank.name : 'Choose a bank'}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-white/70 transition-transform duration-300 ${
+                      bankDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                {bankDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute z-10 mt-2 w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-60 overflow-auto"
+                    role="listbox"
                   >
-                    <span>{selectedBank ? selectedBank.name : 'Select a bank'}</span>
-                    <ChevronDown className="h-5 w-5 text-gray-400" />
-                  </button>
-                  
-                  {bankDropdownOpen && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
-                    >
-                      {NIGERIAN_BANKS.map(bank => (
-                        <div
-                          key={bank.id}
-                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
-                          onClick={() => {
-                            setSelectedBank(bank);
-                            setBankDropdownOpen(false);
-                          }}
-                        >
-                          {bank.name}
-                        </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </div>
+                    {NIGERIAN_BANKS.map((bank) => (
+                      <div
+                        key={bank.id}
+                        className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white/80 hover:text-white transition duration-150"
+                        onClick={() => {
+                          setSelectedBank(bank);
+                          setBankDropdownOpen(false);
+                        }}
+                        role="option"
+                        aria-selected={selectedBank?.id === bank.id}
+                      >
+                        {bank.name}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
               </div>
+            </div>
 
-              {/* Account Number */}
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-medium mb-2">Account Number</label>
+            {/* Account Number */}
+            <div className="mb-6">
+              <label
+                htmlFor="account-number"
+                className="block text-sm font-medium text-blue-100 uppercase tracking-wider mb-2"
+              >
+                Account Number <span className="text-red-300">*</span>
+              </label>
+              <input
+                id="account-number"
+                type="text"
+                maxLength={10}
+                className="w-full px-4 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+                placeholder="Enter 10-digit account number"
+                value={accountNumber}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value) && value.length <= 10) {
+                    setAccountNumber(value);
+                  }
+                }}
+                aria-required="true"
+              />
+            </div>
+
+            {/* Account Name */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-blue-100 uppercase tracking-wider mb-2">
+                Account Name
+              </label>
+              <div className="relative">
                 <input
                   type="text"
-                  maxLength={10}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter 10-digit account number"
-                  value={accountNumber}
+                  className="w-full px-4 py-3 border border-white/20 rounded-lg bg-white/10 text-white/70 placeholder-white/50"
+                  value={accountName}
+                  readOnly
+                  placeholder={verifying ? 'Verifying...' : 'Account name will appear here'}
+                  aria-live="polite"
+                />
+                {verifying && (
+                  <Loader className="absolute right-3 top-3 h-5 w-5 text-blue-400 animate-spin" />
+                )}
+              </div>
+            </div>
+
+            {/* Amount */}
+            <div className="mb-6">
+              <label
+                htmlFor="amount"
+                className="block text-sm font-medium text-blue-100 uppercase tracking-wider mb-2"
+              >
+                Amount (₦) <span className="text-red-300">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-3.5 text-white/70">₦</span>
+                <input
+                  id="amount"
+                  type="text"
+                  className="w-full pl-10 pr-4 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+                  placeholder="Enter amount"
+                  value={amount}
                   onChange={(e) => {
                     const value = e.target.value;
-                    if (/^\d*$/.test(value) && value.length <= 10) {
-                      setAccountNumber(value);
+                    if (/^\d*\.?\d{0,2}$/.test(value)) {
+                      setAmount(value);
                     }
                   }}
+                  aria-required="true"
                 />
               </div>
+              <p className="text-xs text-blue-200 mt-1.5">
+                Available balance: {formatCurrency(availableBalance)}
+              </p>
+            </div>
 
-              {/* Account Name - Read only */}
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-medium mb-2">Account Name</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
-                    value={accountName}
-                    readOnly
-                    placeholder={verifying ? "Verifying..." : "Account name will appear here"}
-                  />
-                  {verifying && (
-                    <div className="absolute right-3 top-3">
-                      <Loader className="h-5 w-5 text-blue-500 animate-spin" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Amount */}
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-medium mb-2">Amount (₦)</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-3 text-gray-500">₦</span>
-                  <input
-                    type="text"
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter amount"
-                    value={amount}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*\.?\d{0,2}$/.test(value)) {
-                        setAmount(value);
-                      }
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Available balance: {formatCurrency(availableBalance)}</p>
-              </div>
-
-              {/* Narration */}
-              <div className="mb-6">
-                <label className="block text-gray-700 text-sm font-medium mb-2">Narration (Optional)</label>
-                <textarea
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="What's this transfer for?"
-                  rows={2}
-                  value={narration}
-                  onChange={(e) => setNarration(e.target.value)}
-                />
-              </div>
-
-              {/* Transfer Button */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg flex items-center justify-center"
-                onClick={handleTransfer}
-                disabled={loading || !selectedBank || !accountNumber || !accountName || !amount}
+            {/* Narration */}
+            <div className="mb-8">
+              <label
+                htmlFor="narration"
+                className="block text-sm font-medium text-blue-100 uppercase tracking-wider mb-2"
               >
-                {loading ? (
-                  <>
-                    <Loader className="animate-spin mr-2 h-5 w-5" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    Transfer Now
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </>
-                )}
+                Narration (Optional)
+              </label>
+              <textarea
+                id="narration"
+                className="w-full px-4 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 resize-none"
+                placeholder="What's this transfer for?"
+                rows={3}
+                value={narration}
+                onChange={(e) => setNarration(e.target.value)}
+              />
+            </div>
+
+            {/* Transfer Button */}
+            <motion.button
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
+              className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition duration-300 ${
+                loading || !selectedBank || !accountNumber || !accountName || !amount
+                  ? 'bg-white/10 cursor-not-allowed text-white/50'
+                  : 'bg-gradient-to-r from-blue-500 to-blue-400 text-white'
+              }`}
+              onClick={handleTransfer}
+              disabled={loading || !selectedBank || !accountNumber || !accountName || !amount}
+              aria-busy={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader className="animate-spin mr-2 h-5 w-5" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Transfer Now
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </motion.button>
+          </motion.div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="lg:w-1/3 p-6 lg:p-10">
+          <motion.div variants={itemVariants} className="space-y-6">
+            <h3 className="text-sm font-bold text-blue-100 uppercase tracking-wider">
+              Recent Transactions
+            </h3>
+
+            <div className="space-y-4">
+              {RECENT_TRANSACTIONS.map((tx) => (
+                <motion.div
+                  key={tx.id}
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.02, boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)' }}
+                  className="p-4 bg-white/10 backdrop-blur-sm rounded-lg transition duration-300"
+                >
+                  <div className="flex justify-between items-start">
+                    <p className="font-medium text-white">{tx.name}</p>
+                    <div
+                      className={`text-sm font-medium ${
+                        tx.status === 'success' ? 'text-green-400' : 'text-red-400'
+                      }`}
+                    >
+                      {tx.status === 'success' ? 'Success' : 'Failed'}
+                    </div>
+                  </div>
+                  <div className="text-sm text-blue-200">{tx.bank}</div>
+                  <div className="flex justify-between mt-2">
+                    <div className="font-semibold text-white">{formatCurrency(tx.amount)}</div>
+                    <div className="text-xs text-blue-200">{tx.date}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              variants={itemVariants}
+              className="p-5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20"
+            >
+              <h4 className="text-sm font-bold text-blue-100 uppercase tracking-wider mb-3">
+                Transfer Tips
+              </h4>
+              <ul className="text-sm text-blue-200 space-y-3">
+                <li className="flex items-start">
+                  <CheckCircle className="h-4 w-4 text-blue-400 mr-2 mt-1" />
+                  Always verify account details before transferring.
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-4 w-4 text-blue-400 mr-2 mt-1" />
+                  Transfers within Nigeria are typically instant.
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-4 w-4 text-blue-400 mr-2 mt-1" />
+                  Save frequent recipients for quick transfers.
+                </li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              variants={itemVariants}
+              className="p-5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20"
+            >
+              <h4 className="text-sm font-bold text-blue-100 uppercase tracking-wider flex items-center mb-2">
+                <CreditCard className="h-5 w-5 mr-2 text-blue-400" />
+                Need Help?
+              </h4>
+              <p className="text-sm text-blue-200">
+                Our support team is available 24/7 to assist you.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.05, color: '#ffffff' }}
+                whileTap={{ scale: 0.95 }}
+                className="mt-3 text-blue-300 font-medium text-sm transition duration-150"
+              >
+                Contact Support
               </motion.button>
             </motion.div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="md:w-1/3">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-white rounded-lg shadow-lg p-6"
-            >
-              <h3 className="font-medium text-gray-800 mb-4">Recent Transactions</h3>
-              
-              <div className="space-y-3">
-                {RECENT_TRANSACTIONS.map(tx => (
-                  <motion.div 
-                    key={tx.id} 
-                    whileHover={{ y: -2 }}
-                    className="p-3 border border-gray-100 rounded-lg hover:shadow-md"
-                  >
-                    <div className="flex justify-between">
-                      <p className="font-medium">{tx.name}</p>
-                      <div className={`text-sm ${tx.status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                        {tx.status === 'success' ? 'Success' : 'Failed'}
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-500">{tx.bank}</div>
-                    <div className="flex justify-between mt-1">
-                      <div className="font-medium text-blue-600">{formatCurrency(tx.amount)}</div>
-                      <div className="text-xs text-gray-500">{tx.date}</div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <h4 className="font-medium text-blue-800 mb-2">Transfer Tips</h4>
-                <ul className="text-sm text-blue-700 space-y-2">
-                  <li className="flex items-start">
-                    <div className="mr-2 mt-1 bg-blue-100 rounded-full p-1">
-                      <CheckCircle className="h-3 w-3 text-blue-600" />
-                    </div>
-                    Verify account details before transferring
-                  </li>
-                  <li className="flex items-start">
-                    <div className="mr-2 mt-1 bg-blue-100 rounded-full p-1">
-                      <CheckCircle className="h-3 w-3 text-blue-600" />
-                    </div>
-                    Transfers between Nigerian banks are processed within minutes
-                  </li>
-                  <li className="flex items-start">
-                    <div className="mr-2 mt-1 bg-blue-100 rounded-full p-1">
-                      <CheckCircle className="h-3 w-3 text-blue-600" />
-                    </div>
-                    Save recipients for faster transfers next time
-                  </li>
-                </ul>
-              </div>
-
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <h4 className="font-medium text-gray-700 flex items-center">
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Need Help?
-                </h4>
-                <p className="text-sm text-gray-600 mt-1">
-                  Our support team is available 24/7 to assist with any transfer issues.
-                </p>
-                <button className="text-blue-600 text-sm font-medium mt-2 hover:text-blue-800">
-                  Contact Support
-                </button>
-              </div>
-            </motion.div>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
